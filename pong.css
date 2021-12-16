@@ -8,11 +8,10 @@ body { background-color: black; color: #AAA; font-size: 12pt; padding: 1em; }
 #sidebar .parts li a            { color: white; text-decoration: none; }
 #sidebar .parts li a:visited    { color: white; }
 #sidebar .parts li a:hover      { color: white; text-decoration: underline; }
-#sidebar .parts li a.selected   { color: #F08010; }
+#sidebar .parts li a.selected   { color: #11b611; }
 #sidebar .parts li a i          { color: #AAA;    }
 #sidebar .parts li a.selected i { color: #F08010; }
 #sidebar .settings              { line-height: 1.2em; height: 1.2em; text-align: right; }
-#sidebar .settings.size         { }
 #sidebar .settings.speed        { margin-bottom: 1em; }
 #sidebar .settings label        { vertical-align: middle; }
 #sidebar .settings input        { vertical-align: middle; }

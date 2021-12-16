@@ -177,6 +177,11 @@ Game = {
     return(len);
   },
 
+  getdist: function(ax,ay,bx,by) {
+    var dist = Math.sqrt((ax-bx)*(ax-bx) + (ay-by)*(ay-by));
+    return(dist);
+  },
+
   timestamp: function() { 
     return new Date().getTime();
   },
