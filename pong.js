@@ -34,6 +34,7 @@ Pong = {
   update: function(dt) {
     //Colision detection
     
+    /*
     for(var n = 0 ; n < this.balls.length ; n++) {
       for(var m = 0 ; m < this.balls.length ; m++) {
         var dist = Game.getdist(this.balls[n].x,this.balls[n].y,this.balls[m].x,this.balls[m].y);
@@ -42,7 +43,7 @@ Pong = {
         }
       }
     }
-    
+    */
     //newballsplease
     var newballs = [];
     for(var n = 0 ; n < this.balls.length ; n++){
@@ -52,7 +53,10 @@ Pong = {
     }
     this.balls = newballs;
 
-    var n =  Game.getdist(1,2,3,4);
+    //control update
+    for(var n = 0 ; n < this.balls.length ; n++)
+    this.balls[n].control();
+
     //movement update
     for(var n = 0 ; n < this.balls.length ; n++)
       this.balls[n].update(dt);
@@ -124,25 +128,30 @@ Pong = {
       this.maxY    = pong.height - pong.cfg.wallWidth - this.radius;
       this.x       = Game.random(this.minX, this.maxX);
       this.y       = Game.random(this.minY, this.maxY);
-      this.direction = Game.random(0,6.28318531);
+      this.direction = Math.PI;//Game.random(0,6.28318531);
       this.velocity = 100;
       this.dx      = (this.velocity * Game.getSinCos("sin", this.direction));
       this.dy      = (this.velocity * Game.getSinCos("cos", this.direction));
       this.color   = "rgb(" + Math.round(Game.random(0,255)) + ", " + Math.round(Game.random(0,255)) + ", " + Math.round(Game.random(0,255)) + ")";
       this.dead    = false;
+      this.Lmotor = Game.random(30,100);
+      this.Rmotor = Game.random(30,100);
+      this.rotation = 0.5;
     },
 
     update: function(dt) {
 
-      this.direction = this.direction + Game.random(-0.2,0.2);
+      //Calclate moment
+      //F = MA
+      //A = F / M
+      this.rotation += (this.Lmotor-this.Rmotor) / this.radius * dt;
+      this.direction += this.rotation * dt;
 
-      this.velocity = this.velocity + Game.random(-0.2,0.2);
-
-      this.dx      = (this.velocity * Game.getSinCos("sin", this.direction));
-      this.dy      = (this.velocity * Game.getSinCos("cos", this.direction));
-
-      this.x = this.x + (this.dx * dt);
-      this.y = this.y + (this.dy * dt);
+      //Calculate motion
+      this.dx += (Math.min(this.Lmotor,this.Rmotor) * Math.sin(this.direction))* dt;
+      this.dy += (Math.min(this.Lmotor,this.Rmotor) * Math.cos(this.direction)+1/dt)* dt; //Gravity
+      this.x += (this.dx * dt);
+      this.y += + (this.dy * dt);
 
       if ((this.dx > 0) && (this.x > this.maxX)) {
         this.x = this.minX;
@@ -156,12 +165,38 @@ Pong = {
 
       if ((this.dy > 0) && (this.y > this.maxY)) {
         this.y = this.minY;
+        this.dead = true;  //Death on ground impact.
         //this.dy = -this.dy;
       }
       else if ((this.dy < 0) && (this.y < this.minY)) {
-        this.y = this.maxY;
+        this.y = 0;
         //this.dy = -this.dy;
       }
+    },
+
+    control: function() {
+      //hight
+      //PID
+      P = 1;
+      D = 2;
+      //this.Rmotor += 30 + (50 - this.y * P) + (0 - this.dy * D);
+      if (this.y > 200)
+      {
+        this.Rmotor = 100;
+      }
+
+      if (this.y < 200)
+      {
+        this.Rmotor = 23;
+      }
+      
+      
+      //Roll
+      //PID
+      P = 1;
+      D = 2;
+      //this.direction this.rotation
+      this.Lmotor = this.Rmotor + ((Math.PI - this.direction) * P) + ((0 - this.rotation) * D);
     },
 
     draw: function(ctx) {
@@ -182,6 +217,25 @@ Pong = {
       ctx.moveTo(this.x, this.y);
       ctx.lineTo(this.x - Game.getSinCos("sin", this.direction)*20, this.y - Game.getSinCos("cos", this.direction)*20);
       ctx.stroke();  // Draw it
+
+      ctx.beginPath();              
+      ctx.lineWidth = "1";
+      ctx.strokeStyle = "rgb(255,255,255)";  // Green path
+      ctx.moveTo(this.x - Math.sin(this.direction+Math.PI/2)*20, this.y - Math.cos(this.direction+Math.PI/2)*20);
+      ctx.lineTo(this.x - Math.sin(this.direction-Math.PI/2)*20, this.y - Math.cos(this.direction-Math.PI/2)*20);
+      ctx.stroke();  // Draw it
+
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(this.x - Math.sin(this.direction+Math.PI/2)*20, this.y - Math.cos(this.direction+Math.PI/2)*20, this.radius/2, 0, 2*Math.PI, true);
+      ctx.fill();
+      ctx.closePath();
+
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(this.x - Math.sin(this.direction-Math.PI/2)*20, this.y - Math.cos(this.direction-Math.PI/2)*20, this.radius/2, 0, 2*Math.PI, true);
+      ctx.fill();
+      ctx.closePath();
 
     },
 /*
